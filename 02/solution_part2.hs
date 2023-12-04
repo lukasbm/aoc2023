@@ -35,17 +35,19 @@ data Game = Game
   deriving (Show)
 
 data Draw = Draw
-  { red :: Maybe Int,
-    green :: Maybe Int,
-    blue :: Maybe Int
+  { red :: Int,
+    green :: Int,
+    blue :: Int
   }
   deriving (Show)
 
 main = do
-  txt <- readFile "test.txt"
+  txt <- readFile "input.txt"
   let content = lines txt
-  let games = map parseGame content
-  print games
+  let gamesInputs = map parseGame content
+  let gameResults = map evaluteGame gamesInputs
+  print gameResults
+  print (sum (map mulColors gameResults))
 
 parseGame :: String -> Game
 parseGame line = do
@@ -63,8 +65,18 @@ parseDraw drawLine =
           blue = findColor drawSplit "blue"
         }
 
-findColor :: [String] -> String -> Maybe Int
-findColor [] _ = Nothing
+findColor :: [String] -> String -> Int
+findColor [] _ = 0
 findColor colorLine color
-  | color `_suffixOf` head colorLine = Just (read (filter isDigit (head colorLine)))
+  | color `_suffixOf` head colorLine = read (filter isDigit (head colorLine))
   | otherwise = findColor (tail colorLine) color
+
+evaluteGame :: Game -> Draw
+evaluteGame g = Draw {red = maxRed, green = maxGreen, blue = maxBlue}
+  where
+    maxRed = maximum (map red (draws g))
+    maxGreen = maximum (map green (draws g))
+    maxBlue = maximum (map blue (draws g))
+
+mulColors :: Draw -> Int
+mulColors d = red d * green d * blue d
