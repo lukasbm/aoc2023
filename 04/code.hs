@@ -1,20 +1,23 @@
-import Data.Text.Split (splitOn)
+type Card = ([Int], [Int])
 
+parseCard :: String -> Card
+parseCard s =
+  let content = tail $ dropWhile (/= ':') s
+   in ( map (read :: String -> Int) $ words $ takeWhile (/= '|') content,
+        map (read :: String -> Int) $ words $ tail $ dropWhile (/= '|') content
+      )
 
-splitOnChar :: Char -> String -> (String, String)
-splitOnChar c s = (takeWhile (/= c) s, dropWhile (== c) s) 
-
-
-wordsWhen
-
+main :: IO ()
 main = do
-    txt <- readFile "test_part1.txt"
-    let content = map (snd . split ":") (lines txt)
-    -- remove prefix
-    print content [0]
+  txt <- readFile "input.txt"
+  let cards = map parseCard (lines txt)
+  let scores = map (calcScore . winningCards) cards
+  print $ sum scores
 
--- get list of winning numbers i have
--- point score is 2^(len of winning numbers i have)
--- len = 0 --> 0 points
+calcScore :: Int -> Int
+calcScore 0 = 0
+calcScore n = 2 ^ (n - 1)
 
-
+-- number of winning cards
+winningCards :: Card -> Int
+winningCards (myNumbers, winningNumbers) = length $ filter (`elem` winningNumbers) myNumbers

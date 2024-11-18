@@ -29,3 +29,5 @@ just need to know the number and then check if symbol in there
 More discussion
 https://www.reddit.com/r/haskell/comments/189m9oi/advent_of_code_2023_day_3/
 
+> For Advent of Code grids, I always just use a Data.Map.Strict.Map (Int, Int) T (for whatever T) and the performance has never been an issue. 
+
