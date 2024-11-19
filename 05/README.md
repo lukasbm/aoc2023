@@ -11,3 +11,8 @@ parseWith p s = case [a | (a, t) <- parse p s, all isSpace t] of
   [] -> error "no parse"
   _ -> error "ambiguous parse"
 ```
+
+
+## Part 2
+
+Problem: There are 1.421.233.717 seeds!

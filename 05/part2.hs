@@ -43,22 +43,32 @@ parseBlocks inp = foldl go [] inp
            in Map name (parseRangeLine line : ranges) : tail prev
       | otherwise = prev
 
+takePairs :: [a] -> [(a, a)]
+takePairs [] = []
+takePairs (x : y : xs) = (x, y) : takePairs xs
+
 inSeedLine :: [(Int, Int)] -> Int -> Bool
 inSeedLine pairs val = any (\(a, b) -> val >= a && val < a + b) pairs
 
 -- can't generate a simple full list of seeds, would be >5B elements
 parseSeedLine :: String -> [(Int, Int)]
--- let pairs = takePairs $ map (read :: String -> Int) $ words $ drop 6 x
---  in concatMap (\(a, b) -> [a .. a + b]) pairs
 parseSeedLine x = takePairs $ map (read :: String -> Int) $ words $ drop 6 x
-  where
-    takePairs :: [a] -> [(a, a)]
-    takePairs [] = []
-    takePairs (x : y : xs) = (x, y) : takePairs xs
+
+parseSeedLineFull :: String -> [Int]
+parseSeedLineFull x =
+  let pairs = takePairs $ map (read :: String -> Int) $ words $ drop 6 x
+   in concatMap (\(a, b) -> [a .. a + b]) pairs
+
+-- iterate over all locations to find the minimum that is still a seed
+iterateLocations :: [Map] -> [(Int, Int)] -> Int -> Int
+iterateLocations maps seeds l =
+  if inSeedLine seeds (reverseTraverseMaps maps l)
+    then l
+    else iterateLocations maps seeds (l + 1)
 
 main :: IO ()
 main = do
-  txt <- readFile "test_part1.txt"
+  txt <- readFile "input.txt"
   -- remove empty lines
   let nel = filter (/= "") (lines txt)
   -- get seeds
@@ -67,19 +77,7 @@ main = do
   let blocks = reverse $ parseBlocks (tail nel)
   -- very important that the blocks are in the correct order (is now the case!)
 
-  print $ traverseMaps blocks 13
-  print $ reverseTraverseMaps blocks 35
-
-  -- let locations = map (traverseMaps blocks) seeds
-  -- print $ minimum locations
-
-  let location_map = last blocks
-
-  let (Map _ ranges) = location_map
-  print $ minimum ranges
-  let mr = minimum ranges
-
-  print $ reverseTraverseMaps blocks (applyRange mr (dest mr))
+  print $ iterateLocations blocks seeds 0
 
 inRange :: Range -> Int -> Bool
 inRange (Range dst src len) val = val >= src && val < src + len
