@@ -1,25 +1,20 @@
 import Data.List (sort)
-import Text.XHtml (h1)
 
 --------- data structures
 
-data Combo = HighCard | OnePair | TwoPair | ThreeOfAKind | FullHouse | FourOfAKind | FiveOfAKind deriving (Show, Eq, Ord)
+data Combo = NoCombo | HighCard | OnePair | TwoPair | ThreeOfAKind | FullHouse | FourOfAKind | FiveOfAKind deriving (Show, Eq, Ord)
 
 data Card = Two | Three | Four | Five | Six | Seven | Eight | Nine | Ten | Jack | Queen | King | Ace deriving (Show, Eq, Ord)
 
 newtype Hand = Hand (Card, Card, Card, Card, Card) deriving (Show)
 
-enumDiff :: Enum a -> Enum a -> Int
-enumDiff a b = fromEnum a - fromEnum b
-
+-- order based on the card value
 instance Ord Hand where
   compare :: Hand -> Hand -> Ordering
   compare (Hand (a1, a2, a3, a4, a5)) (Hand (b1, b2, b3, b4, b5)) = do
-    let scoreHand1 = fromEnum a1
-    let scoreHand2 = fromEnum b1
-    compare hand1 hand2
-
--- TODO: fixme
+    let scoreHand1 = 10000 * fromEnum a1 + 1000 * fromEnum a2 + 100 * fromEnum a3 + 10 * fromEnum a4 + fromEnum a5
+    let scoreHand2 = 10000 * fromEnum b1 + 1000 * fromEnum b2 + 100 * fromEnum b3 + 10 * fromEnum b4 + fromEnum b5
+    compare scoreHand1 scoreHand2
 
 instance Eq Hand where
   (==) :: Hand -> Hand -> Bool
@@ -57,15 +52,29 @@ main = do
 
   let h1 = Hand (Ace, King, Queen, Jack, Ten)
   let h2 = Hand (Ace, King, Queen, Jack, Nine)
+  let h3 = Hand (Two, Four, Three, Three, Three)
 
-  print $ h1 == h2
-  print $ h1 < h2
+  -- print $ h1 == h2
+  -- print $ h1 < h2
+
+  print $ sort h3
 
 --------- solution
 
 determineCombo :: Hand -> Combo
-
-determineCombo hand -- TODO: complete
+determineCombo
+  | isFiveOfAKind = FiveOfAKind
+  | isFourOfAKind = FourOfAKind
+  | isFullHouse = FullHouse
+  | isThreeOfAKind = ThreeOfAKind
+  | isTwoPair = TwoPair
+  | isOnePair = OnePair
+  | isHighCard = HighCard
+  | otherwise = HighCard
+  where
+    isFiveOfAKind = a == b && b == c && c == d && d == e
+    isFourOfAKind = (a == b && b == c && c == d) || (b == c && c == d && d == e)
+    isFullHouse = (a == b && b == c && d == e) || (a == b && c == d && d == e)
 
 -- 100 * combo + card
 -- NOTE: card value is not only determined by the first card, but by the whole hand
