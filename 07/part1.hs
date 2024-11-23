@@ -3,7 +3,7 @@ import Data.Ord (comparing)
 
 --------- data structures
 
-data Combo = NoCombo | HighCard | OnePair | TwoPair | ThreeOfAKind | FullHouse | FourOfAKind | FiveOfAKind deriving (Show, Eq, Ord, Enum)
+data Combo = HighCard | OnePair | TwoPair | ThreeOfAKind | FullHouse | FourOfAKind | FiveOfAKind deriving (Show, Eq, Ord, Enum)
 
 data Card = Two | Three | Four | Five | Six | Seven | Eight | Nine | Ten | Jack | Queen | King | Ace deriving (Show, Eq, Ord, Enum)
 
@@ -32,50 +32,49 @@ parseHand (a : b : c : d : e : _) = (parseCard a, parseCard b, parseCard c, pars
 
 main :: IO ()
 main = do
-  txt <- readFile "test_part1.txt"
+  txt <- readFile "input.txt"
 
   let hands :: [Hand] = map (parseHand . take 5) (lines txt)
   let bids :: [Int] = map ((read :: String -> Int) . drop 6) (lines txt)
 
-  print $ fromEnum TwoPair
-  print $ fromEnum Three
-
   -- solution
-  print $ bids
-  print $ rankHands hands
+  -- print $ bids
+  -- print $ hands
+  -- print $ map handScore hands
+  -- print $ map determineCombo hands -- should be :: one pair, three of a kind , two pair , two pair , three of a kind
+  -- print $ rankGames hands
 
-  -- FIXME: need to sort bids together with the hand ranks!!!!
-
-  let winnings = zipWith (+) (rankHands hands) bids
+  let winnings = zipWith (*) (rankGames hands) bids
   print $ sum winnings
 
 --------- solution
 
 -- Helper Function to get sorting indices
--- NOTE: 1 based index
+-- NOTE: 0 based index
 sortingIndices :: (Ord a) => [a] -> [Int]
-sortingIndices xs = map snd $ sortBy (comparing fst) $ zip xs [1 ..]
+sortingIndices xs = map snd $ sortBy (comparing fst) $ zip xs [0 ..]
 
 -- sort the hands based on the combo and the card values
-rankHands :: [Hand] -> [Int]
-rankHands hands = sortingIndices $ map handScore hands
+rankGames :: [Hand] -> [Int]
+rankGames game =
+  let indices = sortingIndices $ map handScore game
+   in map (+ 1) indices
 
--- TODO: work here!
 determineCombo :: Hand -> Combo
 determineCombo (a, b, c, d, e) =
   let sortedCards = sort [a, b, c, d, e]
    in case sortedCards of
         [s1, s2, s3, s4, s5] -> determineComboFromSorted (s1, s2, s3, s4, s5)
-
-determineComboFromSorted :: Hand -> Combo
-determineComboFromSorted (a, b, c, d, e)
-  | a == b && b == c && c == d && d == e = FiveOfAKind
-  | (a == b && b == c && c == d) || (b == c && c == d && d == e) = FourOfAKind
-  | (a == b && b == c && d == e) || (a == b && c == d && d == e) = FullHouse
-  | (a == b && b == c) && (d == e) || (a == b) && (c == d && d == e) = ThreeOfAKind
-  | (a == b && c == d) || (a == b && d == e) || (b == c && d == e) = TwoPair
-  | a == b || b == c || c == d || d == e = OnePair
-  | otherwise = HighCard
+  where
+    determineComboFromSorted :: Hand -> Combo
+    determineComboFromSorted (a, b, c, d, e)
+      | a == b && b == c && c == d && d == e = FiveOfAKind
+      | (a == b && b == c && c == d) || (b == c && c == d && d == e) = FourOfAKind
+      | (a == b && b == c && d == e) || (a == b && c == d && d == e) = FullHouse
+      | (a == b && b == c) || (b == c && c == d) || (c == d && d == e) = ThreeOfAKind
+      | (a == b && c == d) || (a == b && d == e) || (b == c && d == e) = TwoPair
+      | a == b || b == c || c == d || d == e = OnePair
+      | otherwise = HighCard
 
 -- a combo is always strong than any lower combo with higher card values
 -- 100 * combo + card
