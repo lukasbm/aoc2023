@@ -37,12 +37,8 @@ main = do
   let hands :: [Hand] = map (parseHand . take 5) (lines txt)
   let bids :: [Int] = map ((read :: String -> Int) . drop 6) (lines txt)
 
-  -- solution
-  -- print $ bids
-  -- print $ hands
-  -- print $ map handScore hands
-  -- print $ map determineCombo hands -- should be :: one pair, three of a kind , two pair , two pair , three of a kind
-  -- print $ rankGames hands
+  -- FIXME: answer is too high!
+  -- i really don't know if  determineCombo or rankGames or handScore is wrong
 
   let winnings = zipWith (*) (rankGames hands) bids
   print $ sum winnings
@@ -80,5 +76,6 @@ determineCombo (a, b, c, d, e) =
 -- 100 * combo + card
 -- NOTE: card value is not only determined by the first card, but by the whole hand
 -- need to do pairwise comparison, then sort the list
+-- there a more than
 handScore :: Hand -> Int
-handScore hand@(a, b, c, d, e) = 100000 * fromEnum (determineCombo hand) + 10000 * fromEnum a + 1000 * fromEnum b + 100 * fromEnum c + 10 * fromEnum d + fromEnum e
+handScore hand@(a, b, c, d, e) = 10 ^ 10 * fromEnum (determineCombo hand) + 10 ^ 8 * fromEnum a + 10 ^ 6 * fromEnum b + 10 ^ 4 * fromEnum c + 10 ^ 2 * fromEnum d + fromEnum e

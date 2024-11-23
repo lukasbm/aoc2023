@@ -9,3 +9,7 @@ For computationally expensive stuff we have to compile:
 ```bash
 ghc -O2 part2.hs $$ ./part2
 ```
+
+## Tips
+
+- <https://wjwh.eu/posts/2022-11-30-haskell-aoc-tricks.html>
