@@ -23,30 +23,11 @@ main = do
   let graph = map (parseNode . filter isAlphaNum) (drop 2 $ lines txt) :: [Node]
 
   let starterNodes = filter (\n -> last (name n) == 'A') graph
-  print $ starterNodes
 
-  print $ map name $ take 10 $ walk graph directions (starterNodes !! 0)
-  print $ map name $ take 10 $ walk graph directions (starterNodes !! 1)
+  print $ take 3 $ walkAll graph directions starterNodes
 
-  print $ all (\n -> last (name n) == 'Z') graph
-
-  print $ "----"
-  print $ map (take 2 . walk graph directions) starterNodes
-
-  -- print $ solve $ map (walk graph directions) starterNodes
-
-  trace "calling solve" (solve $ map (walk graph directions) starterNodes)
-
-  print $ "=="
-
--- input: endless traces for each starter node
--- stop if all end on Z
-solve :: [[Node]] -> Int
-solve (t : tr) = if all (\n -> last (name n) == 'Z') t then 0 else 1 + solve tr
-solve [] = error "solve: empty list"
-
--- solve2 :: [Node] -> [Char] -> [Node] -> Int
--- solve2 graph directions
+walkAll :: [Node] -> [Char] -> [Node] -> [Node]
+walkAll graph (d : ds) nodes = map (\n -> walk graph (d : ds) n) nodes
 
 -- walks infinitely (given directions is infinite)
 -- graph, directions, current node, step counter
