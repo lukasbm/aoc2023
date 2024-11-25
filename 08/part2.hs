@@ -26,8 +26,19 @@ main = do
 
   print $ take 3 $ walkAll graph directions starterNodes
 
-walkAll :: [Node] -> [Char] -> [Node] -> [Node]
-walkAll graph (d : ds) nodes = map (\n -> walk graph (d : ds) n) nodes
+solve :: [Node] -> [Char] -> [Node] -> Int
+solve graph directions nodes
+  | allSameName nodes = 0
+  | otherwise = 1 + solve graph (tail directions) (takeStep graph directions nodes)
+
+takeStep :: [Node] -> [Char] -> [Node]
+takeStep graph (d : ds) nodes = map (\n -> walk graph [d] n !! 1) nodes
+
+allSameName :: [Node] -> Bool
+allSameName nodes = let names = map name nodes in all (== head names) names
+
+-- walkAll :: [Node] -> [Char] -> [Node] -> [Node]
+-- walkAll graph (d : ds) nodes = map (\n -> walk graph (d : ds) n) nodes
 
 -- walks infinitely (given directions is infinite)
 -- graph, directions, current node, step counter
